@@ -82,6 +82,7 @@ function install_architech_graphics {
 
     # Setting up wallpaper
     gsettings set org.gnome.desktop.background picture-uri     file://${IMAGES_DIRECTORY}/architech-wallpaper.png
+    gsettings set org.gnome.desktop.background picture-options "scaled"
     gsettings set org.gnome.desktop.background primary-color   "#ffffffffffff"
     gsettings set org.gnome.desktop.background secondary-color "#ffffffffffff"
 }
