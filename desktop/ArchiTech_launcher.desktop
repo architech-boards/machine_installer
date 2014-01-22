@@ -1,0 +1,13 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Icon[en_US]=@icons-directory@/architech-splashscreen-icon.png
+Name[en_US]=ArchiTech SDK
+Comment[en_US]=ArchiTech SDK launcher
+Exec=@executable-path@/splashscreen
+Name=ArchiTech SDK
+Comment=ArchiTech SDK
+Icon=@icons-directory@/architech-splashscreen-icon.png

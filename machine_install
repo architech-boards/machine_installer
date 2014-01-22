@@ -1,0 +1,194 @@
+#!/bin/bash
+
+#######################################################################################################################
+# Parameters
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd ${DIR}
+WORKING_DIRECTORY=`pwd`
+INSTALL_PACKAGES="no"
+INSTALL_GRAPHICS="no"
+USERNAME=`who am i | awk '{print $1}'`
+GROUPNAME=${USERNAME}
+CUSTOM_BIN_DIRECTORY=${HOME}/bin
+IMAGES_DIRECTORY="/usr/share/images"
+DESKTOP_DIRECTORY="${HOME}/Desktop"
+INSTALL_DIRECTORY="${HOME}/architech_sdk"
+ARCHITECH_BOARDS_SERVER="https://github.com/architech-boards/"
+SPLASHSCREEN_REPORITORY="splashscreen"
+
+#######################################################################################################################
+# Helpers
+
+function print_usage {
+cat << EOF
+
+ This program prepares the current machine to work with ArchiTech's SDK.
+ Options -p and -g will work only with Ubuntu 12.04 32-bit.
+
+ Usage: $0 [options]
+
+ OPTIONS:
+ -h                 Print this help and exit
+ -p                 Install packages and commands
+ -g                 Install ArchiTech graphics
+ -d <directory>     Customize installation directory. Default one is:
+                        ${INSTALL_DIRECTORY}
+
+EOF
+}
+
+function internet_error {
+    echo "ERROR: Impossible to connect to internet, double check your Internet connection. Aborting."
+    exit 1   
+}
+
+function install_packages {
+    # Replacing dash with bash
+    echo "dash    dash/sh boolean false" | sudo debconf-set-selections ; sudo dpkg-reconfigure --frontend=noninteractive dash
+
+    # Installing needed packages
+    echo "Downloading and installing packages..."
+    sudo apt-get --yes --force-yes install gawk wget git-core diffstat unzip texinfo build-essential chrpath libsdl1.2-dev xterm vim curl u-boot-tools > /dev/null
+    [ $? -eq 0 ] || internet_error
+
+    [ -d ${CUSTOM_BIN_DIRECTORY} ] || [ ! -e ${CUSTOM_BIN_DIRECTORY} ] || { echo "ERROR: I need to create directory ${CUSTOM_BIN_DIRECTORY} but the filepath seems to be already used by some other file. Aborting"; exit 1; }
+
+    mkdir -p ${CUSTOM_BIN_DIRECTORY}
+    [ $? -eq 0 ] || { echo "ERROR: Impossible to create directory ${CUSTOM_BIN_DIRECTORY}. Aborting."; exit 1; }
+
+    if [ -z "`echo $PATH | grep "${HOME}/bin" `" ]
+    then
+        # Registering bin directory in bash PATH environment variable
+        printf "export PATH=\"\${PATH}:${CUSTOM_BIN_DIRECTORY}\"\n" >> ${HOME}/.bashrc
+        [ $? -eq 0 ] || { echo "ERROR: Impossible to add ${CUSTOM_BIN_DIRECTORY} to PATH environment variable. Aborting."; exit 1; }
+        source ${HOME}/.bashrc
+    fi
+
+    # Downloading repo command
+    curl http://commondatastorage.googleapis.com/git-repo-downloads/repo > ${HOME}/bin/repo
+    [ $? -eq 0 ] || internet_error
+    chmod a+x ${HOME}/bin/repo
+}
+
+function install_architech_graphics {    
+    sudo mkdir -p ${IMAGES_DIRECTORY}
+    sudo cp ${WORKING_DIRECTORY}/images/architech-splashscreen-icon.png ${IMAGES_DIRECTORY}
+    sudo cp ${WORKING_DIRECTORY}/images/architech-wallpaper.png         ${IMAGES_DIRECTORY}
+
+    # Setting up desktop link
+    cat ${WORKING_DIRECTORY}/desktop/ArchiTech_launcher.desktop | sed "s|@icons-directory@|${IMAGES_DIRECTORY}|g" | sed "s|@executable-path@|${INSTALL_DIRECTORY}/${SPLASHSCREEN_REPORITORY}|g" > ${DESKTOP_DIRECTORY}/architech.desktop
+
+    # Setting up wallpaper
+    gconftool-2 -t string -s /desktop/gnome/background/picture_filename   "${IMAGES_DIRECTORY}/architech-wallpaper.png"
+    gconftool-2 -t string -s /desktop/gnome/background/picture_options    "scaled"
+    gconftool-2 -t string -s /desktop/gnome/background/color_shading_type "solid"
+    gconftool-2 -t string -s /desktop/gnome/background/primary_color      "#ffffffffffff"
+    gconftool-2 -t int    -s /desktop/gnome/background/picture_opacity    100
+    gconftool-2 -t string -s /desktop/gnome/background/secondary_color    "#ffffffffffff"
+    gconftool-2 -t bool   -s /desktop/gnome/background/draw_background     true
+}
+
+function setup_git_author {
+    # Setting user.name to a default value
+    git config --global --get user.name
+    if [ $? -ne 0 ]
+    then
+        git config --global user.name "Architech User"
+    fi
+
+    # Setting user.email to a default value
+    git config --global --get user.email
+    if [ $? -ne 0 ]
+    then
+        git config --global user.email ""
+    fi
+}
+
+#######################################################################################################################
+# Preliminary checks
+
+if [ "${USER}" == "root" ]
+then
+    echo ""
+    echo "    ERROR: do not run this script as root."
+    echo ""
+    print_usage $0
+    exit 1
+fi
+
+[ "`sudo whoami`" == "root" ] || { echo "ERROR: You are not a sudoer user."; exit 1; }
+
+#######################################################################################################################
+# Options parsing
+
+while getopts "hpgd:" option
+do
+    case ${option} in
+        h)
+            print_usage $0
+            exit 0
+            ;;
+        p)
+            INSTALL_PACKAGES="yes"
+            ;;
+        g)
+            INSTALL_GRAPHICS="yes"
+            ;;
+        d)
+            INSTALL_DIRECTORY=${OPTARG}
+            ;;
+        ?)
+            print_usage $0
+            exit 1
+            ;;
+    esac
+done
+
+#######################################################################################################################
+# Sanity checks
+
+[ -d ${INSTALL_DIRECTORY} ] || [ ! -e ${INSTALL_DIRECTORY} ] || { echo "ERROR: I need to create directory ${INSTALL_DIRECTORY} but the filepath seems to be already used by some other file. Aborting"; exit 1; }
+
+#######################################################################################################################
+# Main
+
+if [ -d ${INSTALL_DIRECTORY} ]
+then
+cat<<EOF
+
+ WARNING:
+ Directory ${INSTALL_DIRECTORY} will be deleted.
+
+EOF
+    read -p "Are you sure you want to continue? [yN]: "
+    if [ "${REPLY}" != "y" -a "${REPLY}" != "Y" ]
+    then
+        echo "Aborting."
+        exit 1
+    fi
+    sudo rm -rf ${INSTALL_DIRECTORY}
+    [ $? -eq 0 ] || { echo "ERROR: Impossible to delete directory ${INSTALL_DIRECTORY}. Aborting."; exit 1; }
+fi
+
+mkdir -p  ${INSTALL_DIRECTORY}
+[ $? -eq 0 ] || { echo "ERROR: Impossible to create directory ${INSTALL_DIRECTORY}. Aborting."; exit 1; }
+
+if [ "${INSTALL_GRAPHICS}" == "yes" ]
+then
+    install_architech_graphics
+fi
+
+if [ "${INSTALL_PACKAGES}" == "yes" ]
+then
+    install_packages
+fi
+
+setup_git_author
+
+cd ${INSTALL_DIRECTORY}
+git clone -b dora ${ARCHITECH_BOARDS_SERVER}/${SPLASHSCREEN_REPORITORY}.git
+[ $? -eq 0 ] || internet_error
+./${SPLASHSCREEN_REPORITORY}/scripts/install
+[ $? -eq 0 ] || { echo "Impossible to install the SDK. Aborting"; exit 1; }
+./${SPLASHSCREEN_REPORITORY}/splashscreen
