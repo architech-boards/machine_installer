@@ -26,7 +26,7 @@ cat << EOF
  This program prepares the current machine to work with ArchiTech's SDK.
  Options -p and -g will work only with Ubuntu 12.04 32-bit.
 
- Usage: $0 [options]
+ Usage: $1 [options]
 
  OPTIONS:
  -h                 Print this help and exit
@@ -104,21 +104,6 @@ function setup_git_author {
 }
 
 #######################################################################################################################
-# Preliminary checks
-
-if [ "${USER}" == "root" ]
-then
-    echo ""
-    echo "    ERROR: do not run this script as root."
-    echo ""
-    print_usage $0
-    exit 1
-fi
-
-[ "`sudo whoami`" == "root" ] || { echo "ERROR: You are not a sudoer user."; exit 1; }
-sudo -v
-
-#######################################################################################################################
 # Options parsing
 
 while getopts "hpgd:" option
@@ -148,6 +133,21 @@ done
 # Sanity checks
 
 [ -d ${INSTALL_DIRECTORY} ] || [ ! -e ${INSTALL_DIRECTORY} ] || { echo "ERROR: I need to create directory ${INSTALL_DIRECTORY} but the filepath seems to be already used by some other file. Aborting"; exit 1; }
+
+#######################################################################################################################
+# Preliminary checks
+
+if [ "${USER}" == "root" ]
+then
+    echo ""
+    echo "    ERROR: do not run this script as root."
+    echo ""
+    print_usage $0
+    exit 1
+fi
+
+[ "`sudo whoami`" == "root" ] || { echo "ERROR: You are not a sudoer user."; exit 1; }
+sudo -v
 
 #######################################################################################################################
 # Main
