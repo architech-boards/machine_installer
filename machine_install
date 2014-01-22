@@ -81,13 +81,9 @@ function install_architech_graphics {
     chmod +x ${DESKTOP_DIRECTORY}/architech.desktop
 
     # Setting up wallpaper
-    gconftool-2 -t string -s /desktop/gnome/background/picture_filename   "${IMAGES_DIRECTORY}/architech-wallpaper.png"
-    gconftool-2 -t string -s /desktop/gnome/background/picture_options    "scaled"
-    gconftool-2 -t string -s /desktop/gnome/background/color_shading_type "solid"
-    gconftool-2 -t string -s /desktop/gnome/background/primary_color      "#ffffffffffff"
-    gconftool-2 -t int    -s /desktop/gnome/background/picture_opacity    100
-    gconftool-2 -t string -s /desktop/gnome/background/secondary_color    "#ffffffffffff"
-    gconftool-2 -t bool   -s /desktop/gnome/background/draw_background     true
+    gsettings set org.gnome.desktop.background picture-uri     file://${IMAGES_DIRECTORY}/architech-wallpaper.png
+    gsettings set org.gnome.desktop.background primary-color   "#ffffffffffff"
+    gsettings set org.gnome.desktop.background secondary-color "#ffffffffffff"
 }
 
 function setup_git_author {
@@ -193,4 +189,5 @@ git clone -b dora ${ARCHITECH_BOARDS_SERVER}/${SPLASHSCREEN_REPORITORY}.git
 [ $? -eq 0 ] || internet_error
 ./${SPLASHSCREEN_REPORITORY}/scripts/install
 [ $? -eq 0 ] || { echo "Impossible to install the SDK. Aborting"; exit 1; }
-./${SPLASHSCREEN_REPORITORY}/splashscreen
+cd ${SPLASHSCREEN_REPORITORY}
+./splashscreen
