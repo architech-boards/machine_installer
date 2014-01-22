@@ -78,6 +78,7 @@ function install_architech_graphics {
 
     # Setting up desktop link
     cat ${WORKING_DIRECTORY}/desktop/ArchiTech_launcher.desktop | sed "s|@icons-directory@|${IMAGES_DIRECTORY}|g" | sed "s|@executable-path@|${INSTALL_DIRECTORY}/${SPLASHSCREEN_REPORITORY}|g" > ${DESKTOP_DIRECTORY}/architech.desktop
+    chmod +x ${DESKTOP_DIRECTORY}/architech.desktop
 
     # Setting up wallpaper
     gconftool-2 -t string -s /desktop/gnome/background/picture_filename   "${IMAGES_DIRECTORY}/architech-wallpaper.png"
