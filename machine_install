@@ -101,6 +101,12 @@ function setup_git_author {
     then
         git config --global user.email ""
     fi
+
+    git config --global --get color.ui
+    if [ $? -ne 0 ]
+    then
+        git config --global color.ui "auto"
+    fi
 }
 
 #######################################################################################################################
