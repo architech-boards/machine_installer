@@ -62,7 +62,7 @@ function install_packages {
         # Registering bin directory in bash PATH environment variable
         printf "export PATH=\"\${PATH}:${CUSTOM_BIN_DIRECTORY}\"\n" >> ${HOME}/.bashrc
         [ $? -eq 0 ] || { echo "ERROR: Impossible to add ${CUSTOM_BIN_DIRECTORY} to PATH environment variable. Aborting."; exit 1; }
-        source ${HOME}/.bashrc
+	export PATH="${PATH}:${HOME}/bin"
     fi
 
     # Downloading repo command
