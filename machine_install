@@ -16,6 +16,7 @@ DESKTOP_DIRECTORY="${HOME}/Desktop"
 INSTALL_DIRECTORY="${HOME}/architech_sdk"
 ARCHITECH_BOARDS_SERVER="https://github.com/architech-boards"
 SPLASHSCREEN_REPORITORY="splashscreen"
+SETUP_VBOXSF="no"
 
 #######################################################################################################################
 # Helpers
@@ -32,6 +33,7 @@ cat << EOF
  -h                 Print this help and exit
  -p                 Install packages and commands
  -g                 Install ArchiTech graphics
+ -v                 Add user ${USERNAME} to vboxsf group
  -d <directory>     Customize installation directory. Default one is:
                         ${INSTALL_DIRECTORY}
 
@@ -69,6 +71,10 @@ function install_packages {
     curl http://commondatastorage.googleapis.com/git-repo-downloads/repo > ${HOME}/bin/repo
     [ $? -eq 0 ] || internet_error
     chmod a+x ${HOME}/bin/repo
+}
+
+function setup_vboxsf_group {
+    sudo usermod -a -G vboxsf $USERNAME
 }
 
 function install_architech_graphics {    
@@ -112,7 +118,7 @@ function setup_git_author {
 #######################################################################################################################
 # Options parsing
 
-while getopts "hpgd:" option
+while getopts "hpgd:v" option
 do
     case ${option} in
         h)
@@ -127,6 +133,9 @@ do
             ;;
         d)
             INSTALL_DIRECTORY=${OPTARG}
+            ;;
+        v)
+            SETUP_VBOXSF="yes"
             ;;
         ?)
             print_usage $0
@@ -182,6 +191,11 @@ mkdir -p  ${INSTALL_DIRECTORY}
 if [ "${INSTALL_GRAPHICS}" == "yes" ]
 then
     install_architech_graphics
+fi
+
+if [ "${SETUP_VBOXSF}" == "yes" ]
+then
+    setup_vboxsf_group
 fi
 
 if [ "${INSTALL_PACKAGES}" == "yes" ]
