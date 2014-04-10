@@ -51,6 +51,7 @@ function install_packages {
 
     # Installing needed packages
     echo "Downloading and installing packages..."
+    sudo apt-get update
     sudo apt-get --yes --force-yes install gawk wget git-core diffstat unzip texinfo build-essential chrpath libsdl1.2-dev xterm vim curl u-boot-tools libqtwebkit4 qt4-dev-tools texi2html subversion apache2 > /dev/null
     [ $? -eq 0 ] || internet_error
 
