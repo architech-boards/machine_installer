@@ -51,7 +51,7 @@ function install_packages {
 
     # Installing needed packages
     echo "Downloading and installing packages..."
-    sudo apt-get update
+    echo -e ${SUDO_PASSWORD} | sudo -S bash -c "apt-get update"
     sudo apt-get --yes --force-yes install gawk wget git-core diffstat unzip texinfo build-essential chrpath libsdl1.2-dev xterm vim curl u-boot-tools libqtwebkit4 qt4-dev-tools texi2html subversion apache2 > /dev/null
     [ $? -eq 0 ] || internet_error
 
@@ -164,6 +164,24 @@ fi
 
 [ "`sudo whoami`" == "root" ] || { echo "ERROR: You are not a sudoer user."; exit 1; }
 sudo -v
+
+#######################################################################################################################
+# Memorize sudo password
+if [ "${USER}" != "architech" -o "${HOME}" != "/home/architech" ] 
+then
+    SUDO_PASSWORD="wrong"
+    while [ "${SUDO_PASSWORD}" != "${SUDO_PASSWORD2}" ]; 
+    do
+	echo "Please enter sudo password: "
+	read SUDO_PASSWORD
+	echo "Please confirm sudo password: "
+	read SUDO_PASSWORD2
+    done
+else
+    SUDO_PASSWORD="architech"
+fi
+
+export SUDO_PASSWORD
 
 #######################################################################################################################
 # Main
