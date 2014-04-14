@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -x
 #######################################################################################################################
 # Parameters
 
@@ -47,12 +48,12 @@ function internet_error {
 
 function install_packages {
     # Replacing dash with bash
-    echo "dash    dash/sh boolean false" | sudo debconf-set-selections ; sudo dpkg-reconfigure --frontend=noninteractive dash
+    echo "dash    dash/sh boolean false" | do_sudo debconf-set-selections ; do_sudo dpkg-reconfigure --frontend=noninteractive dash
 
     # Installing needed packages
     echo "Downloading and installing packages..."
-    echo -e ${SUDO_PASSWORD} | sudo -S bash -c "apt-get update"
-    sudo apt-get --yes --force-yes install gawk wget git-core diffstat unzip texinfo build-essential chrpath libsdl1.2-dev xterm vim curl u-boot-tools libqtwebkit4 qt4-dev-tools texi2html subversion apache2 > /dev/null
+    do_sudo "apt-get update"
+    do_sudo "apt-get --yes --force-yes install gawk wget git-core diffstat unzip texinfo build-essential chrpath libsdl1.2-dev xterm vim curl u-boot-tools libqtwebkit4 qt4-dev-tools texi2html subversion apache2 > /dev/null"
     [ $? -eq 0 ] || internet_error
 
     [ -d ${CUSTOM_BIN_DIRECTORY} ] || [ ! -e ${CUSTOM_BIN_DIRECTORY} ] || { echo "ERROR: I need to create directory ${CUSTOM_BIN_DIRECTORY} but the filepath seems to be already used by some other file. Aborting"; exit 1; }
@@ -75,13 +76,13 @@ function install_packages {
 }
 
 function setup_vboxsf_group {
-    sudo usermod -a -G vboxsf $USERNAME
+    do_sudo "usermod -a -G vboxsf $USERNAME"
 }
 
 function install_architech_graphics {    
-    sudo mkdir -p ${IMAGES_DIRECTORY}
-    sudo cp ${WORKING_DIRECTORY}/images/architech-splashscreen-icon.png ${IMAGES_DIRECTORY}
-    sudo cp ${WORKING_DIRECTORY}/images/architech-wallpaper.png         ${IMAGES_DIRECTORY}
+    do_sudo "mkdir -p ${IMAGES_DIRECTORY}"
+    do_sudo "cp ${WORKING_DIRECTORY}/images/architech-splashscreen-icon.png ${IMAGES_DIRECTORY}"
+    do_sudo "cp ${WORKING_DIRECTORY}/images/architech-wallpaper.png         ${IMAGES_DIRECTORY}"
 
     # Setting up desktop link
     cat ${WORKING_DIRECTORY}/desktop/ArchiTech_launcher.desktop | sed "s|@icons-directory@|${IMAGES_DIRECTORY}|g" | sed "s|@executable-path@|${INSTALL_DIRECTORY}/${SPLASHSCREEN_REPORITORY}|g" > ${DESKTOP_DIRECTORY}/architech.desktop
@@ -151,6 +152,20 @@ done
 [ -d ${INSTALL_DIRECTORY} ] || [ ! -e ${INSTALL_DIRECTORY} ] || { echo "ERROR: I need to create directory ${INSTALL_DIRECTORY} but the filepath seems to be already used by some other file. Aborting"; exit 1; }
 
 #######################################################################################################################
+# Library check
+
+if [ ! -d libsh ]
+then
+	git clone https://github.com/architech-boards/libsh.git
+	[ $? -eq 0 ] || { internet_error; }
+fi
+cd libsh
+git pull
+[ $? -eq 0 ] || { internet_error; }
+source lib.sh
+cd ..
+
+#######################################################################################################################
 # Preliminary checks
 
 if [ "${USER}" == "root" ]
@@ -162,26 +177,10 @@ then
     exit 1
 fi
 
-[ "`sudo whoami`" == "root" ] || { echo "ERROR: You are not a sudoer user."; exit 1; }
-sudo -v
+get_sudo_password
 
-#######################################################################################################################
-# Memorize sudo password
-if [ "${USER}" != "architech" -o "${HOME}" != "/home/architech" ] 
-then
-    SUDO_PASSWORD="wrong"
-    while [ "${SUDO_PASSWORD}" != "${SUDO_PASSWORD2}" ]; 
-    do
-	echo "Please enter sudo password: "
-	read SUDO_PASSWORD
-	echo "Please confirm sudo password: "
-	read SUDO_PASSWORD2
-    done
-else
-    SUDO_PASSWORD="architech"
-fi
-
-export SUDO_PASSWORD
+[ `do_sudo "whoami"` == "root" ] || { echo "ERROR: You are not a sudoer user."; exit 1; }
+do_sudo "sudo -v"
 
 #######################################################################################################################
 # Main
@@ -200,7 +199,7 @@ EOF
         echo "Aborting."
         exit 1
     fi
-    sudo rm -rf ${INSTALL_DIRECTORY}
+    do_sudo "rm -rf ${INSTALL_DIRECTORY}"
     [ $? -eq 0 ] || { echo "ERROR: Impossible to delete directory ${INSTALL_DIRECTORY}. Aborting."; exit 1; }
 fi
 
