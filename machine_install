@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 #######################################################################################################################
 # Parameters
 
@@ -40,14 +40,10 @@ cat << EOF
 EOF
 }
 
-function internet_error {
-    echo "ERROR: Impossible to connect to internet, double check your Internet connection. Aborting."
-    exit 1   
-}
 
 function install_packages {
     # Replacing dash with bash
-    echo "dash    dash/sh boolean false" | do_sudo debconf-set-selections ; do_sudo dpkg-reconfigure --frontend=noninteractive dash
+    echo "dash    dash/sh boolean false" | sudo "debconf-set-selections" ; do_sudo "dpkg-reconfigure --frontend=noninteractive dash"
 
     # Installing needed packages
     echo "Downloading and installing packages..."
@@ -153,14 +149,27 @@ done
 #######################################################################################################################
 # Library check
 
+function message_fail_libsh()
+{
+	    local ZENITY_INSTALLED
+        ZENITY_INSTALLED=`dpkg-query -l | grep zenity-common |& awk -F" " '{ print $1 }'`
+
+	    if [ "${ZENITY_INSTALLED}" != "ii" ]
+	    then
+		    echo "Impossible to connect to internet. Please, double check your Internet connection"
+	    else
+		    zenity --error --text "Impossible to connect to internet. Please, double check your Internet connection"
+	    fi
+}
+
 if [ ! -d libsh ]
 then
 	git clone https://github.com/architech-boards/libsh.git
-	[ $? -eq 0 ] || { internet_error; }
+	[ $? -eq 0 ] || { message_fail_libsh; exit 1; }
 fi
 cd libsh
 git pull
-[ $? -eq 0 ] || { internet_error; }
+[ $? -eq 0 ] || { message_fail_libsh; exit 1; }
 source lib.sh
 cd ..
 
