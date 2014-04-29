@@ -185,8 +185,6 @@ then
     exit 1
 fi
 
-get_sudo_password
-
 [ `do_sudo "whoami"` == "root" ] || { echo "ERROR: You are not a sudoer user."; exit 1; }
 do_sudo "sudo -v"
 
