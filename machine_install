@@ -185,8 +185,8 @@ then
     exit 1
 fi
 
-[ `do_sudo "whoami"` == "root" ] || { echo "ERROR: You are not a sudoer user."; exit 1; }
 do_sudo "sudo -v"
+[ `do_sudo "whoami"` == "root" ] || { echo "ERROR: You are not a sudoer user."; exit 1; }
 
 #######################################################################################################################
 # Main
@@ -235,4 +235,4 @@ git clone -b dora ${ARCHITECH_BOARDS_SERVER}/${SPLASHSCREEN_REPORITORY}.git
 ./${SPLASHSCREEN_REPORITORY}/scripts/install
 [ $? -eq 0 ] || { echo "Impossible to install the SDK. Aborting"; exit 1; }
 cd ${SPLASHSCREEN_REPORITORY}
-./splashscreen
+nohup ./splashscreen > /dev/null 2>&1 &
