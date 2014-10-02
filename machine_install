@@ -164,7 +164,7 @@ function message_fail_libsh()
 
 if [ ! -d libsh ]
 then
-	git clone https://github.com/architech-boards/libsh.git
+	git clone ${ARCHITECH_BOARDS_SERVER}/libsh.git
 	[ $? -eq 0 ] || { message_fail_libsh; exit 1; }
 fi
 cd libsh
