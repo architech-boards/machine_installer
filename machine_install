@@ -48,7 +48,7 @@ function install_packages {
     # Installing needed packages
     echo "Downloading and installing packages..."
     do_sudo "apt-get update"
-    do_sudo "apt-get --yes --force-yes install gawk wget git-core diffstat unzip texinfo build-essential chrpath libsdl1.2-dev xterm vim curl u-boot-tools libqtwebkit4 qt4-dev-tools texi2html subversion apache2 > /dev/null"
+    do_sudo "apt-get --yes --force-yes install gawk wget git-core diffstat unzip texinfo gcc-multilib build-essential chrpath socat libsdl1.2-dev xterm vim curl u-boot-tools libqtwebkit4 qt4-dev-tools texi2html subversion apache2 > /dev/null"
     [ $? -eq 0 ] || internet_error
 
     [ -d ${CUSTOM_BIN_DIRECTORY} ] || [ ! -e ${CUSTOM_BIN_DIRECTORY} ] || { echo "ERROR: I need to create directory ${CUSTOM_BIN_DIRECTORY} but the filepath seems to be already used by some other file. Aborting"; exit 1; }
@@ -236,7 +236,7 @@ fi
 setup_git_author
 
 cd ${INSTALL_DIRECTORY}
-git clone -b dora ${ARCHITECH_BOARDS_SERVER}/${SPLASHSCREEN_REPORITORY}.git
+git clone -b dizzy ${ARCHITECH_BOARDS_SERVER}/${SPLASHSCREEN_REPORITORY}.git
 [ $? -eq 0 ] || internet_error
 ./${SPLASHSCREEN_REPORITORY}/scripts/install
 [ $? -eq 0 ] || { echo "Impossible to install the SDK. Aborting"; exit 1; }
