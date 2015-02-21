@@ -17,6 +17,7 @@ INSTALL_DIRECTORY="${HOME}/architech_sdk"
 ARCHITECH_BOARDS_SERVER="https://github.com/architech-boards"
 SPLASHSCREEN_REPORITORY="splashscreen"
 SETUP_VBOXSF="no"
+BRANCH="2.0.0"
 
 #######################################################################################################################
 # Helpers
@@ -239,7 +240,7 @@ fi
 setup_git_author
 
 cd ${INSTALL_DIRECTORY}
-git clone -b dizzy ${ARCHITECH_BOARDS_SERVER}/${SPLASHSCREEN_REPORITORY}.git
+git clone -b ${BRANCH} ${ARCHITECH_BOARDS_SERVER}/${SPLASHSCREEN_REPORITORY}.git
 [ $? -eq 0 ] || internet_error
 ./${SPLASHSCREEN_REPORITORY}/scripts/install
 [ $? -eq 0 ] || { echo "Impossible to install the SDK. Aborting"; exit 1; }
