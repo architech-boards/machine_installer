@@ -50,7 +50,7 @@ function install_packages {
     echo "Downloading and installing packages..."
     do_sudo "apt-get update"
     [ $? -eq 0 ] || internet_error
-    do_sudo "apt-get --yes --force-yes install gawk wget git-core diffstat unzip texinfo gcc-multilib build-essential chrpath socat libsdl1.2-dev xterm vim curl u-boot-tools libqtwebkit4 qt4-dev-tools texi2html subversion apache2 autoconf vim-common uuid-dev iasl default-jre > /dev/null"
+    do_sudo "apt-get --yes --force-yes install gawk wget git-core diffstat unzip texinfo gcc-multilib build-essential chrpath socat libsdl1.2-dev xterm vim curl u-boot-tools libqtwebkit4 qt4-dev-tools texi2html subversion apache2 autoconf vim-common uuid-dev iasl default-jre libncurses5-dev > /dev/null"
     [ $? -eq 0 ] || internet_error
     do_sudo "apt-get --yes --force-yes remove modemmanager > /dev/null"
     [ $? -eq 0 ] || internet_error
