@@ -17,7 +17,7 @@ INSTALL_DIRECTORY="${HOME}/architech_sdk"
 ARCHITECH_BOARDS_SERVER="https://github.com/architech-boards"
 SPLASHSCREEN_REPORITORY="splashscreen"
 SETUP_VBOXSF="no"
-BRANCH="2.2.0"
+BRANCH="2.4.0"
 
 #######################################################################################################################
 # Helpers
